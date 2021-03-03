@@ -1,0 +1,9 @@
+alpha
+hug
+dog
+zebra
+apple
+human
+xylophone
+test
+script

@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Name        : sort.c
- * Author      : 
- * Date        : 
+ * Author      : Jacob Gerega
+ * Date        : 3/2/21
  * Description : Uses quicksort to sort a file of either ints, doubles, or
  *               strings.
- * Pledge      :
+ * Pledge      : I pledge my honor that I have abided by the Stevens Honor System.
  ******************************************************************************/
 #include <errno.h>
 #include <getopt.h>
@@ -77,22 +77,108 @@ size_t read_data(char *filename, char **data) {
     return index;
 }
 
-void display_array(double *array, const int length) {
-    putchar('[');
-    if (length > 0) {
-        printf("%f", *array);
+void display_help(char *name){
+    printf("Usage: %s [-i|-d] filename\n   -i: Specifies the file contains ints.\n   -d: Specifies the file contains doubles\n   filename: The file to sort.\n   No flags defaults to sorting strings.\n", name);
+}
+
+void display_arrayint(int *array, const int length) {
+
+    for (int i = 0; i < length; i++) {
+        printf("%d\n", *(array+(i)));
     }
-    for (int i = 1; i < length; i++) {
-        printf(", %f", *(array + (i)));
+}
+
+void display_arraydb(double *array, const int length) {
+    for (int i = 0; i < length; i++) {
+        printf("%f\n", *(array+(i)));
     }
-    puts("]");
+}
+
+void display_arraystr(char **array, const int length) {
+    for (int i = 0; i < length; i++) {
+        printf("%s\n", *(array+(i)));
+    }
 }
 
 int main(int argc, char **argv) {
-    double nums[] = { 1.0, 2.0, 4.0, -5.0, -3.0, -2.0 };
-    const int len = sizeof(nums) / sizeof(double);
-    display_array(nums, len);
-    quicksort(nums, len, sizeof(double), dbl_cmp);
-    display_array(nums, len);
+    int flagc = 0;
+    int it = 0;
+    int db = 0;
+    int opt;
+    while((opt = getopt(argc, argv, ":id")) != -1){
+        switch(opt){
+            case 'i':
+                flagc++;
+                it = 1;
+                break;
+            case 'd':
+                flagc++;
+                db = 1;
+                break;
+            case '?':
+                printf("Error: Unknown option '-%c' received.\n", optopt);
+                display_help(argv[0]);
+                return EXIT_FAILURE;
+        }
+    }
+    //no flags and no files
+    if(flagc == 0 && optind == argc){
+        display_help(argv[0]);
+        return EXIT_FAILURE;
+    }
+    //no files
+    if(optind == argc){
+        printf("Error: No input file specified.");
+        return EXIT_FAILURE;
+    }
+    //too many files
+    if(optind != argc){
+        int x = optind;
+        int count = 0;
+        while(x < argc){
+            x++;
+            count++;
+        }
+        if(count > 1){
+            printf("Error: Too many files specified.");
+            return EXIT_FAILURE;
+        }
+        
+    }
+    //too many flags
+    if(flagc > 1){
+        printf("Error: Too many flags specified.");
+        return EXIT_FAILURE;
+    }
+    char** data = (char **)malloc(MAX_ELEMENTS*MAX_STRLEN+2);
+    size_t len = read_data(argv[optind], data);
+
+    if(it == 1){
+        int* intarr = (int *)malloc(len*sizeof(int));
+        for(int i = 0; i < len; i++){
+            intarr[i] = atoi(data[i]);
+        }
+        quicksort(intarr, len, sizeof(int), int_cmp);
+        display_arrayint(intarr, len);
+        free(intarr);
+    }
+    else if(db == 1){
+        double* dbarr = (double *)malloc(len*sizeof(double));
+        for(int i = 0; i < len; i++){
+            dbarr[i] = atof(data[i]);
+        }
+        quicksort(dbarr, len, sizeof(double), dbl_cmp);
+        display_arraydb(dbarr, len);
+        free(dbarr);
+    }
+    else{
+        quicksort(data, len, sizeof(char*), str_cmp);
+        display_arraystr(data, len);
+    }
+    for(int i = 0; i < len; i++){
+            free(data[i]);
+        }
+    free(data);
+    
     return EXIT_SUCCESS;
 }

@@ -68,8 +68,8 @@ int dbl_cmp(const void *a, const void *b) {
  * First casts the void pointers to char* pointers (i.e. char**).
  * Returns the result of calling strcmp on them.
  */
-int str_cmp(const void *a, const void *b) { 
-    return strcmp((const char *)a, (const char *)b);
+int str_cmp(const void *a, const void *b) {
+    return strcmp(*(const char **)a, *(const char **)b);
 }
 
 /**
