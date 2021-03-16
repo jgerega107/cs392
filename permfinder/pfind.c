@@ -41,11 +41,20 @@ void rdir(char* p){
             continue;
         }
         if(entry->d_type == DT_DIR){
-            printf("%s [dir]\n", filename);
             rdir(filename);
         }
         else{
-            printf("%s\n", filename);
+            int matching = 1;
+            for(int i = 0; i < 9; i+=3){
+                if(!(buf.st_mode & perms[i]) && 
+                !(buf.st_mode & perms[i+1]) &&
+                !(buf.st_mode & perms[i+2])){
+                    matching = 0;
+                }
+            }
+            if(matching == 1){
+                printf("%s\n", filename);
+            }
         }
     }
 
@@ -54,7 +63,7 @@ void rdir(char* p){
 
 int main(int argc, char *argv[]){
     char path[PATH_MAX];
-
+    char* pms;
     int dir = 0;
     int perm = 0;
     int opt;
@@ -69,6 +78,7 @@ int main(int argc, char *argv[]){
                 break;
             case 'p':
                 perm = 1;
+                //first check if the perm string is valid
                 if(strlen(optarg) == 9){
                     for(int i = 0; i < 9; i+=3){
                         if(!((optarg[i] == 'r' || optarg[i] == '-') &&
@@ -82,6 +92,17 @@ int main(int argc, char *argv[]){
                 else{
                     fprintf(stderr, "Error: Permissions string '%s' is invalid.\n", optarg);
                     return EXIT_FAILURE;
+                }
+                for(int i = 0; i < 9; i+=3){
+                    if(optarg[i] != 'r'){
+                        perms[i] = ~perms[i];
+                    }
+                    if(optarg[i+1] != 'w'){
+                        perms[i+1] = ~perms[i+1];
+                    }
+                    if(optarg[i+2] != 'x'){
+                        perms[i+2] = ~perms[i+2];
+                    }
                 }
                 break;
             case '?':
