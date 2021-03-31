@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     close(pfind_to_sort[1]);
 
     char buffer[4096];
+    int wc = 0;
     while (1)
     {
         ssize_t count = read(STDIN_FILENO, buffer, sizeof(buffer));
@@ -77,12 +78,17 @@ int main(int argc, char *argv[])
         }
         else
         {
+            for(int i = 0; i < count; i++){
+                if(buffer[i] == '\n'){
+                    wc++;
+                }
+            }
             write(STDOUT_FILENO, buffer, count);
         }
     }
     close(sort_to_parent[0]);
     wait(NULL);
     wait(NULL);
-
+    printf("Total matching: %d\n", wc);
     return EXIT_SUCCESS;
 }
