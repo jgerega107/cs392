@@ -5,8 +5,18 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+/**
+ * Author: Jacob Gerega
+ * Pledge: I pledge my honor that I have abided by the Stevens Honor System.
+ * Date: 3/30/21
+ * */
+
 int main(int argc, char *argv[])
 {
+    if(argc <= 1){
+        printf("Usage: %s -d <directory> -p <permissions string> [-h]\n", argv[0]);
+        return EXIT_FAILURE;
+    }
 
     int pfind_to_sort[2], sort_to_parent[2];
     if (pipe(pfind_to_sort) < 0)
@@ -25,11 +35,10 @@ int main(int argc, char *argv[])
     {
         close(pfind_to_sort[0]);
         dup2(pfind_to_sort[1], STDOUT_FILENO);
-
         close(sort_to_parent[0]);
         close(sort_to_parent[1]);
 
-        if (execl("pfind", "pfind", "-d", argv[2], "-p", argv[4], NULL) < 0)
+        if (execl("pfind", "pfind", argv[1], argv[2], argv[3], argv[4], NULL) < 0)
         {
             fprintf(stderr, "Error: pfind failed. %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
@@ -84,11 +93,11 @@ int main(int argc, char *argv[])
                 }
             }
             write(STDOUT_FILENO, buffer, count);
+            printf("Total matching: %d\n", wc);
         }
     }
     close(sort_to_parent[0]);
     wait(NULL);
     wait(NULL);
-    printf("Total matching: %d\n", wc);
     return EXIT_SUCCESS;
 }
