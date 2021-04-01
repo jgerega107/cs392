@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    pid_t pid[2];
-    if ((pid[0] = fork()) == 0)
+    pid_t child_pid[2];
+    if ((child_pid[0] = fork()) == 0)
     {
         close(pfind_to_sort[0]);
         dup2(pfind_to_sort[1], STDOUT_FILENO);
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if ((pid[1] = fork()) == 0)
+    if ((child_pid[1] = fork()) == 0)
     {
         close(pfind_to_sort[1]);
         dup2(pfind_to_sort[0], STDIN_FILENO);
@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
     int wc = 0;
     while (1)
     {
-        ssize_t count = read(STDIN_FILENO, buffer, sizeof(buffer));
-        if (count == -1)
+        ssize_t bytes = read(STDIN_FILENO, buffer, sizeof(buffer));
+        if (bytes == -1)
         {
             if (errno == EINTR)
             {
@@ -82,20 +82,20 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        else if (count == 0)
+        else if (bytes == 0)
         {
             break;
         }
         else
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < bytes; i++)
             {
                 if (buffer[i] == '\n')
                 {
                     wc++;
                 }
             }
-            write(STDOUT_FILENO, buffer, count);
+            write(STDOUT_FILENO, buffer, bytes);
             printf("Total matching: %d\n", wc);
         }
     }
