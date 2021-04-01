@@ -13,7 +13,8 @@
 
 int main(int argc, char *argv[])
 {
-    if(argc <= 1){
+    if (argc <= 1)
+    {
         printf("Usage: %s -d <directory> -p <permissions string> [-h]\n", argv[0]);
         return EXIT_FAILURE;
     }
@@ -87,8 +88,10 @@ int main(int argc, char *argv[])
         }
         else
         {
-            for(int i = 0; i < count; i++){
-                if(buffer[i] == '\n'){
+            for (int i = 0; i < count; i++)
+            {
+                if (buffer[i] == '\n')
+                {
                     wc++;
                 }
             }
