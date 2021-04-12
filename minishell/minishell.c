@@ -30,7 +30,9 @@ int main(int argc, char* argv[]){
             tc++;
             token = strtok(NULL, " \t");
         }
-
+        if(tokens[0] == NULL){
+            continue;
+        }
         if(strcmp(tokens[0], "exit") == 0){ //exit program
             break;
         }
