@@ -135,14 +135,7 @@ int main(int argc, char *argv[])
             {
                 if (signal_value == SIGINT)
                 {
-                    if (kill(pid, SIGINT) == -1)
-                    {
-                        fprintf(stderr, "Error: kill() failed. %s.\n", strerror(errno));
-                        return EXIT_FAILURE;
-                    }
-                    signal_value = 0;
                     printf("\n");
-                    errno = 0;
                     continue;
                 }
                 fprintf(stderr, "Error: wait() failed. %s.\n", strerror(errno));
