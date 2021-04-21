@@ -26,16 +26,17 @@ void catch_signal(int sig)
 
 int main(int argc, char *argv[])
 {
-    struct sigaction action;
-    memset(&action, 0, sizeof(struct sigaction));
-    action.sa_handler = catch_signal;
-    if (sigaction(SIGINT, &action, NULL) == -1)
-    {
-        perror("sigaction");
-        return EXIT_FAILURE;
-    }
     while (true)
     {
+        struct sigaction action;
+        memset(&action, 0, sizeof(struct sigaction));
+        action.sa_handler = catch_signal;
+        if (sigaction(SIGINT, &action, NULL) == -1)
+        {
+            perror("sigaction");
+            return EXIT_FAILURE;
+        }
+        pid_t pid;
         char cwd[PATH_MAX]; //current working directory
         if (getcwd(cwd, PATH_MAX) == NULL)
         {
@@ -122,7 +123,6 @@ int main(int argc, char *argv[])
         }
         else if (tokens[0] != NULL)
         {
-            pid_t pid;
             if ((pid = fork()) == 0)
             {
                 if (execvp(tokens[0], tokens) < 0)
@@ -131,14 +131,16 @@ int main(int argc, char *argv[])
                     exit(EXIT_FAILURE);
                 }
             }
-            if (waitpid(pid, NULL, 0) < 0)
+            signal(SIGINT, SIG_IGN);
+            int status = 0;
+            if (waitpid(pid, &status, 0) < 0)
             {
-                if (signal_value == SIGINT)
-                {
-                    printf("\n");
-                    continue;
-                }
                 fprintf(stderr, "Error: wait() failed. %s.\n", strerror(errno));
+            }
+            if(WIFSIGNALED(status) && WTERMSIG(status) == SIGINT){
+                printf("\n");
+                signal_value = 0;
+                continue;
             }
         }
     }
