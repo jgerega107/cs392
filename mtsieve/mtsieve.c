@@ -72,41 +72,60 @@ void *part_sieve(void *ptr){
 
 int main(int argc, char* argv[]){
     long a = -1; //lower bound wanted by user
+    int af = 0;
     long b = -1; //upper bound wanted by user
+    int bf = 0;
     long t = -1; //threads wanted by user 
+    int tf = 0;
     int opt = 0;
+    char* ep;
     while ((opt = getopt(argc, argv, ":s:e:t:")) != -1) {
         switch (opt) {
             case 's':
-                a = strtol(optarg, NULL, 10);
+                af = 1;
+                a = strtol(optarg, &ep, 10);
+                if(strcmp(ep, optarg) == 0){
+                    fprintf(stderr, "Error: Invalid input '%s' received for parameter '-%c'\n", optarg, opt);
+                    return EXIT_FAILURE;
+                }
                 if(a > INT_MAX){
                     fprintf(stderr, "Error: Integer overflow for parameter '-%c'\n", opt);
                     return EXIT_FAILURE;
                 }
-                if(a == 0){
-                    fprintf(stderr, "Error: Invalid input '%s' received for parameter '-%c'\n", optarg, opt);
+                else if(a < INT_MIN){
+                    fprintf(stderr, "Error: Integer underflow for parameter '-%c'\n", opt);
                     return EXIT_FAILURE;
                 }
                 break;
             case 'e':
-                b = strtol(optarg, NULL, 10);
+                bf = 1;
+                b = strtol(optarg, &ep, 10);
+                if(strcmp(ep, optarg) == 0){
+                    fprintf(stderr, "Error: Invalid input '%s' received for parameter '-%c'\n", optarg, opt);
+                    return EXIT_FAILURE;
+                }
                 if(b > INT_MAX){
                     fprintf(stderr, "Error: Integer overflow for parameter '-%c'\n", opt);
                     return EXIT_FAILURE;
                 }
-                if(b == 0){
-                    fprintf(stderr, "Error: Invalid input '%s' received for parameter '-%c'\n", optarg, opt);
+                else if(b < INT_MIN){
+                    fprintf(stderr, "Error: Integer underflow for parameter '-%c'\n", opt);
                     return EXIT_FAILURE;
                 }
                 break;
             case 't':
-                t = strtol(optarg, NULL, 10);
+                tf = 1;
+                t = strtol(optarg, &ep, 10);
+                if(strcmp(ep, optarg) == 0){
+                    fprintf(stderr, "Error: Invalid input '%s' received for parameter '-%c'\n", optarg, opt);
+                    return EXIT_FAILURE;
+                }
                 if(t > INT_MAX){
                     fprintf(stderr, "Error: Integer overflow for parameter '-%c'\n", opt);
                     return EXIT_FAILURE;
                 }
-                if(t == 0){
-                    fprintf(stderr, "Error: Invalid input '%s' received for parameter '-%c'\n", optarg, opt);
+                else if(t < INT_MIN){
+                    fprintf(stderr, "Error: Integer underflow for parameter '-%c'\n", opt);
                     return EXIT_FAILURE;
                 }
                 break;
@@ -122,11 +141,11 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Error: Non-option argument '%s' supplied.\n", argv[optind++]);
         return EXIT_FAILURE;
     }
-    if(a==-1 && b == -1 && t == -1){
+    if(af==0 && bf == 0 && tf == 0){
         display_help(argv[0]);
         return EXIT_FAILURE;
     }
-    if(a == -1){
+    if(af == 0){
         fprintf(stderr, "Error: Required argument <starting value> is missing.\n");
         return EXIT_FAILURE;
     }
@@ -134,7 +153,7 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Error: Starting value must be >= 2.\n");
         return EXIT_FAILURE;
     }
-    if(b == -1){
+    if(bf == 0){
         fprintf(stderr, "Error: Required argument <ending value> is missing.\n");
         return EXIT_FAILURE;
     }
@@ -146,7 +165,7 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Error: Ending value must be >= starting value.\n");
         return EXIT_FAILURE;
     }
-    if(t == -1){
+    if(tf == 0){
         fprintf(stderr, "Error: Required argument <num threads> is missing.\n");
         return EXIT_FAILURE;
     }
