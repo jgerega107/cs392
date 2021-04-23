@@ -1,0 +1,14 @@
+./mtsieve -s100 -e200000000 -t1 : 0m2.014s
+./mtsieve -s100 -e200000000 -t2 : 0m1.471s
+./mtsieve -s100 -e200000000 -t3 : 0m1.313s
+./mtsieve -s100 -e200000000 -t4 : 0m1.383s
+./mtsieve -s100 -e200000000 -t5 : 0m1.279s
+./mtsieve -s100 -e200000000 -t6 : 0m1.310s
+
+I have an AMD Ryzen 5 3600X 6 Core Processor but VirtualBox can only use half of that.
+In timing my program, it becomes apparent that time does not scale linearly with the number of threads I use.
+The program appears to plateau in terms of time around 4 threads. The only real major speedups were from 1 to 2 to 3 threads.
+One example I can think of is say if we have a million numbers to go through, and theoretically 500 thousand threads,
+it would be 2 numbers in each segment for every thread. The time to go through 2 numbers is extremely negligible. If we change 500k threads 
+to 1 million threads (1 thread for every number), then now we're only down to 1 number per thread.
+So in this case, the main reason as to why the time is plateauing is because of the divisions we must do.
