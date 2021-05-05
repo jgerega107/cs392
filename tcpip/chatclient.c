@@ -13,11 +13,21 @@ char username[MAX_NAME_LEN + 1];
 char inbuf[BUFLEN + 1];
 char outbuf[MAX_MSG_LEN + 1];
 
+/**
+ * Author: Jacob Gerega
+ * Pledge: I pledge my honor that I have abided by the Stevens Honor System.
+ * */
+
+void cleanup(){
+    if(fcntl(client_socket, F_GETFD) >= 0){
+        close(client_socket);
+    }
+}
+
 int handle_stdin(){
     fflush(stdin);
-    int br = read(STDIN_FILENO, outbuf, MAX_MSG_LEN);
-    outbuf[br - 1] = '\0';
-    if(br-1 > strlen(outbuf)){
+    int retval = get_string(outbuf, MAX_MSG_LEN);
+    if(retval == TOO_LONG){
         printf("Sorry, limit your message to %d characters.\n", MAX_MSG_LEN);
         return 1;
     }
@@ -25,7 +35,7 @@ int handle_stdin(){
         printf("Goodbye.\n");
         return 0;
     }
-    if(strcmp(outbuf, "") == 0){
+    if(retval == NO_INPUT){
         return 1;
     }
     ssize_t bytes_read;
@@ -78,17 +88,14 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Error: Port must be in range [1024, 65535].\n");
         return EXIT_FAILURE;
     }
-    fflush(stdout);
-    printf("Enter your username: ");
-    fflush(stdout);
     while(true){
-        fflush(stdin);
-        int br = read(STDIN_FILENO, username, MAX_NAME_LEN);
-        username[br - 1] = '\0';
-        if(br-1 > MAX_NAME_LEN){
+        printf("Enter your username: ");
+        fflush(stdout);
+        int retval = get_string(username, MAX_NAME_LEN);
+        if(retval == TOO_LONG){
             printf("Sorry, limit your username to %d characters.\n", MAX_NAME_LEN);
         }
-        else if(strlen(username) <= 0){
+        else if(retval == NO_INPUT){
             printf("Username must be at least 1 character.\n");
         }
         else{
@@ -105,7 +112,8 @@ int main(int argc, char* argv[]){
     serv_addr.sin_port = htons(port);
     if(connect(client_socket, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr_in)) != 0){
         fprintf(stderr, "Error: Failed to connect to server. %s.\n", strerror(errno));
-        goto EXIT;
+        cleanup();
+        return EXIT_FAILURE;
     }
     else{
         int bytes_recvd = recv(client_socket, inbuf, MAX_MSG_LEN, 0);
@@ -114,11 +122,13 @@ int main(int argc, char* argv[]){
         }
         else if(bytes_recvd == 0){
             fprintf(stderr, "Failed to receive message from server. %s.\n", strerror(errno));
-            goto EXIT;
+            cleanup();
+            return EXIT_FAILURE;
         }
         else{
             printf("All connections are busy. Try again later.\n");
-            goto EXIT;
+            cleanup();
+            return EXIT_FAILURE;
         }
     }
     printf("\n%s\n\n", inbuf);
@@ -143,22 +153,26 @@ int main(int argc, char* argv[]){
         else{
             if(FD_ISSET(client_socket, &fds)){
                 int rval = handle_client_socket();
-                if(rval != 1){
-                    goto EXIT;
+                if(rval == 1){
+                    cleanup();
+                    return EXIT_FAILURE;
+                }
+                else if(rval == 0){
+                    cleanup();
+                    return EXIT_SUCCESS;
                 }
             }
             else if(FD_ISSET(STDIN_FILENO, &fds)){
                 int rval = handle_stdin();
-                if(rval != 1){
-                    goto EXIT;
+                if(rval == -1){
+                    cleanup();
+                    return EXIT_FAILURE;
+                }
+                else if(rval == 0){
+                    cleanup();
+                    return EXIT_SUCCESS;
                 }
             }
         }
     }
-
-EXIT:
-    if(fcntl(client_socket, F_GETFD) >= 0){
-        close(client_socket);
-    }
-    return EXIT_SUCCESS;
 }
