@@ -51,7 +51,7 @@ int handle_client_socket(){
         return -1;
     }
     if(strcmp(inbuf, "bye") == 0){
-        printf("Exit\n");
+        printf("Goodbye.\n");
         return 0;
     }
     printf("\n%s\n", inbuf);
