@@ -61,7 +61,7 @@ int handle_client_socket(){
         return -1;
     }
     if(strcmp(inbuf, "bye") == 0){
-        printf("Goodbye.\n");
+        printf("\nServer initiated shutdown.\n");
         return 0;
     }
     printf("\n%s\n", inbuf);
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]){
         else{
             if(FD_ISSET(client_socket, &fds)){
                 int rval = handle_client_socket();
-                if(rval == 1){
+                if(rval == -1){
                     cleanup();
                     return EXIT_FAILURE;
                 }
