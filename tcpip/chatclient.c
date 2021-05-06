@@ -26,7 +26,7 @@ void cleanup(){
 
 int handle_stdin(){
     fflush(stdout);
-    int retval = get_string(outbuf, MAX_MSG_LEN);
+    int retval = get_string(outbuf, MAX_MSG_LEN+1);
     if(retval == TOO_LONG){
         printf("Sorry, limit your message to %d characters.\n", MAX_MSG_LEN);
         return 1;
@@ -39,7 +39,7 @@ int handle_stdin(){
         return 1;
     }
     ssize_t bytes_read;
-    if((bytes_read = send(client_socket, outbuf, MAX_MSG_LEN, 0)) == -1){
+    if((bytes_read = send(client_socket, outbuf, MAX_MSG_LEN+1, 0)) == -1){
         fprintf(stderr, "Error: Failed to send message to server. %s.\n", strerror(errno));
     }
     return 1;
@@ -119,12 +119,12 @@ int main(int argc, char* argv[]){
             inbuf[bytes_recvd] = '\0';
         }
         else if(bytes_recvd == 0){
-            fprintf(stderr, "Failed to receive message from server. %s.\n", strerror(errno));
+            printf("All connections are busy. Try again later.\n");
             cleanup();
             return EXIT_FAILURE;
         }
-        else{
-            printf("All connections are busy. Try again later.\n");
+        else if(bytes_recvd < 0){
+            fprintf(stderr, "Failed to receive message from server. %s.\n", strerror(errno));
             cleanup();
             return EXIT_FAILURE;
         }

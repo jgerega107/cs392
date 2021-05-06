@@ -20,7 +20,7 @@
 #include "util.h"
 
 // Max number of concurrent clients.
-#define MAX_CONNECTIONS 3
+#define MAX_CONNECTIONS 16
 
 int server_socket = -1, num_connections = 0;
 int client_sockets[MAX_CONNECTIONS];
