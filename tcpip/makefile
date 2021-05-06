@@ -1,11 +1,11 @@
+#Author: Jacob Gerega
+#Pledge: I pledge my honor that I have abided by the Stevens Honor System.
 CC     = gcc
 C_FILE = $(wildcard *.c)
 TARGET = $(patsubst %.c,%,$(C_FILE))
-CFLAGS = -g
+CFLAGS = -g -Wall -Werror -pedantic-errors
 
-chatclient: chatclient.c util.h
-	$(CC) $(CFLAGS) chatclient.c util.h -o chatclient
-chatserver: chatserver.c util.h
-	$(CC) $(CFLAGS) chatserver.c util.h -o chatserver
+all: util.h
+	$(CC) $(CFLAGS) $(C_FILE) util.h -o $(TARGET)
 clean:
 	rm -f $(TARGET) $(TARGET).exe

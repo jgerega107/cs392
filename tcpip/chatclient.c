@@ -25,7 +25,7 @@ void cleanup(){
 }
 
 int handle_stdin(){
-    fflush(stdin);
+    fflush(stdout);
     int retval = get_string(outbuf, MAX_MSG_LEN);
     if(retval == TOO_LONG){
         printf("Sorry, limit your message to %d characters.\n", MAX_MSG_LEN);
@@ -42,13 +42,11 @@ int handle_stdin(){
     if((bytes_read = send(client_socket, outbuf, MAX_MSG_LEN, 0)) == -1){
         fprintf(stderr, "Error: Failed to send message to server. %s.\n", strerror(errno));
     }
-    else{
-        return 1;
-    }
+    return 1;
 }
 
 int handle_client_socket(){
-    int bytes_recvd = recv(client_socket, inbuf, MAX_MSG_LEN, 0);
+    int bytes_recvd = recv(client_socket, inbuf, BUFLEN, 0);
     if(bytes_recvd > 0){
         inbuf[bytes_recvd] = '\0';
     }
@@ -91,7 +89,7 @@ int main(int argc, char* argv[]){
     while(true){
         printf("Enter your username: ");
         fflush(stdout);
-        int retval = get_string(username, MAX_NAME_LEN);
+        int retval = get_string(username, MAX_NAME_LEN+1);
         if(retval == TOO_LONG){
             printf("Sorry, limit your username to %d characters.\n", MAX_NAME_LEN);
         }
