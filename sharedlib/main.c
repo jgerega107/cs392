@@ -19,7 +19,7 @@ int main() {
      * with the failure exit code. */
     handle = dlopen("./libsum.so", RTLD_NOW);
     if(!handle){
-        fprintf(stderr, "Error: Failed to create handle. %s.\n", strerror(errno));
+        fprintf(stderr, "Error: %s.\n", strerror(errno));
         return EXIT_FAILURE;
     }
 
@@ -53,6 +53,8 @@ int main() {
 
     /* TODO: Close the shared library.  If it fails, print the system-generated
      * error message, and return from the program with the failure exit code. */
-    dlclose(handle);
+    if(dlclose(handle) != 0){
+        fprintf(stderr, "Error: %s.\n", strerror(errno));
+    }
     return EXIT_SUCCESS;
 }
